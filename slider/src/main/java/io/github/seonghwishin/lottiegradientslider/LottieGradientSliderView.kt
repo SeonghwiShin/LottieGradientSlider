@@ -99,7 +99,7 @@ class LottieGradientSliderView @JvmOverloads constructor(
         }
 
     @ColorInt
-    var overlayColor: Int = 0x66000000
+    var overlayColor: Int = Color.argb(128, 0, 0, 0)
         set(value) {
             field = value
             progressOverlayView.setBackgroundColor(value)
@@ -313,7 +313,7 @@ class LottieGradientSliderView @JvmOverloads constructor(
             showValue = getBoolean(R.styleable.LottieGradientSliderView_lgs_showValue, true)
             cornerRadiusPx = getDimension(R.styleable.LottieGradientSliderView_lgs_cornerRadius, dp(12).toFloat())
             contentScrimColor = getColor(R.styleable.LottieGradientSliderView_lgs_contentScrimColor, 0x33000000)
-            overlayColor = getColor(R.styleable.LottieGradientSliderView_lgs_overlayColor, 0x66000000)
+            overlayColor = getColor(R.styleable.LottieGradientSliderView_lgs_overlayColor, Color.argb(128, 0, 0, 0))
             textColor = getColor(R.styleable.LottieGradientSliderView_lgs_textColor, Color.WHITE)
             textShadowColor = getColor(R.styleable.LottieGradientSliderView_lgs_textShadowColor, 0x66000000)
             textShadowRadiusPx = getDimension(R.styleable.LottieGradientSliderView_lgs_textShadowRadius, dp(2).toFloat())
