@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="LottieGradientSliderView">
+        <attr name="lgs_title" format="string" />
+        <attr name="lgs_progress" format="integer" />
+        <attr name="lgs_max" format="integer" />
+        <attr name="lgs_reverseProgress" format="boolean" />
+        <attr name="lgs_showValue" format="boolean" />
+        <attr name="lgs_cornerRadius" format="dimension" />
+        <attr name="lgs_gradientStartColor" format="color" />
+        <attr name="lgs_gradientEndColor" format="color" />
+        <attr name="lgs_contentScrimColor" format="color" />
+        <attr name="lgs_overlayColor" format="color" />
+        <attr name="lgs_textColor" format="color" />
+        <attr name="lgs_textShadowColor" format="color" />
+        <attr name="lgs_textShadowRadius" format="dimension" />
+        <attr name="lgs_titlePaddingStart" format="dimension" />
+        <attr name="lgs_valuePaddingEnd" format="dimension" />
+    </declare-styleable>
+</resources>
