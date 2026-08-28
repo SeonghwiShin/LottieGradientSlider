@@ -139,7 +139,3 @@ git push origin 0.1.5
 
 4. Open `https://jitpack.io/#SeonghwiShin/LottieGradientSlider`.
 5. Build the tag.
-
-## Portfolio Note
-
-This project is a clean-room extraction of a production UI idea: a custom slider that combines image, animation, and gradient backgrounds for audio-style controls. It does not include proprietary product code or assets.
