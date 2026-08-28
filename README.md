@@ -12,7 +12,7 @@ It is designed for expressive audio, mood, ambience, and mixer-style controls wh
 
 ## Features
 
-- Single reusable custom view, independent from `RecyclerView`
+- Reusable Android custom slider view
 - Gradient, remote image, and remote Lottie backgrounds
 - Optional reversed progress for volume/mixer UX
 - Content scrim and text shadow options for readable labels on bright backgrounds
