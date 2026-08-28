@@ -12,7 +12,6 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewConfiguration
 import android.view.ViewOutlineProvider
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
@@ -31,7 +30,6 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import kotlin.math.abs
 
 class LottieGradientSliderView @JvmOverloads constructor(
     context: Context,
@@ -58,9 +56,7 @@ class LottieGradientSliderView @JvmOverloads constructor(
     private var overlayWidthAnimator: ValueAnimator? = null
     private var currentOverlayWidth: Int = 0
     private var progressValue: Int = 50
-    private var touchDownX: Float = 0f
     private var isDraggingThumb: Boolean = false
-    private val touchSlop: Int = ViewConfiguration.get(context).scaledTouchSlop
 
     var maxValue: Int = 100
         set(value) {
@@ -161,12 +157,19 @@ class LottieGradientSliderView @JvmOverloads constructor(
         overlaySeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, rawProgress: Int, fromUser: Boolean) {
                 val value = if (reverseProgress) maxValue - rawProgress else rawProgress
-                setProgressInternal(value, animateOverlay = fromUser && !isDraggingThumb)
+                setProgressInternal(value, animateOverlay = !fromUser || !isDraggingThumb)
                 listener?.onValueChanged(value, fromUser)
             }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar) = Unit
-            override fun onStopTrackingTouch(seekBar: SeekBar) = Unit
+            override fun onStartTrackingTouch(seekBar: SeekBar) {
+                overlayWidthAnimator?.cancel()
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                overlaySeekBar.post {
+                    isDraggingThumb = false
+                }
+            }
         })
     }
 
@@ -297,19 +300,10 @@ class LottieGradientSliderView @JvmOverloads constructor(
         overlaySeekBar.splitTrack = false
         overlaySeekBar.setOnTouchListener { _, event ->
             when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    touchDownX = event.x
-                    isDraggingThumb = false
-                }
-
-                MotionEvent.ACTION_MOVE -> {
-                    if (abs(event.x - touchDownX) > touchSlop) {
-                        isDraggingThumb = true
-                    }
-                }
-
+                MotionEvent.ACTION_DOWN -> isDraggingThumb = false
+                MotionEvent.ACTION_MOVE -> isDraggingThumb = true
                 MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> {
+                MotionEvent.ACTION_CANCEL -> overlaySeekBar.post {
                     isDraggingThumb = false
                 }
             }
