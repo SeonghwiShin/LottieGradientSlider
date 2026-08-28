@@ -1,5 +1,6 @@
 package io.github.seonghwishin.lottiegradientslider
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Outline
@@ -11,6 +12,7 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import android.view.ViewOutlineProvider
+import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -50,6 +52,8 @@ class LottieGradientSliderView @JvmOverloads constructor(
 
     private var listener: OnValueChangeListener? = null
     private var sliderBackground: SliderBackground? = null
+    private var overlayWidthAnimator: ValueAnimator? = null
+    private var currentOverlayWidth: Int = 0
 
     var maxValue: Int = 100
         set(value) {
@@ -136,6 +140,11 @@ class LottieGradientSliderView @JvmOverloads constructor(
         set(value) {
             field = value.coerceAtLeast(0)
             updateTextMargins()
+        }
+
+    var overlayAnimationDuration: Long = 120L
+        set(value) {
+            field = value.coerceAtLeast(0L)
         }
 
     init {
@@ -273,6 +282,9 @@ class LottieGradientSliderView @JvmOverloads constructor(
         lottieView.isGone = true
         contentScrimView.setBackgroundColor(contentScrimColor)
         progressOverlayView.setBackgroundColor(overlayColor)
+        lottieView.setFailureListener {
+            showFallbackGradient()
+        }
 
         overlaySeekBar.max = maxValue
         overlaySeekBar.progressDrawable = ColorDrawable(Color.TRANSPARENT)
@@ -319,6 +331,7 @@ class LottieGradientSliderView @JvmOverloads constructor(
             textShadowRadiusPx = getDimension(R.styleable.LottieGradientSliderView_lgs_textShadowRadius, dp(2).toFloat())
             titlePaddingStartPx = getDimensionPixelSize(R.styleable.LottieGradientSliderView_lgs_titlePaddingStart, dp(12))
             valuePaddingEndPx = getDimensionPixelSize(R.styleable.LottieGradientSliderView_lgs_valuePaddingEnd, dp(12))
+            overlayAnimationDuration = getInt(R.styleable.LottieGradientSliderView_lgs_overlayAnimationDuration, 120).toLong()
             start = getColor(R.styleable.LottieGradientSliderView_lgs_gradientStartColor, defaultStart)
             end = getColor(R.styleable.LottieGradientSliderView_lgs_gradientEndColor, defaultEnd)
             progress = getInt(R.styleable.LottieGradientSliderView_lgs_progress, 50)
@@ -331,6 +344,13 @@ class LottieGradientSliderView @JvmOverloads constructor(
         gradientView.isGone = true
         imageView.isGone = true
         lottieView.isGone = true
+    }
+
+    private fun showFallbackGradient() {
+        lottieView.cancelAnimation()
+        lottieView.isGone = true
+        imageView.isGone = true
+        gradientView.isVisible = true
     }
 
     private fun updateClip() {
@@ -365,6 +385,12 @@ class LottieGradientSliderView @JvmOverloads constructor(
         updateProgressOverlay()
     }
 
+    override fun onDetachedFromWindow() {
+        overlayWidthAnimator?.cancel()
+        lottieView.cancelAnimation()
+        super.onDetachedFromWindow()
+    }
+
     private fun updateProgressOverlay() {
         if (backgroundLayer.width == 0) {
             backgroundLayer.post { updateProgressOverlay() }
@@ -373,6 +399,29 @@ class LottieGradientSliderView @JvmOverloads constructor(
 
         val overlayProgress = if (reverseProgress) maxValue - progress else progress
         val overlayWidth = (backgroundLayer.width * (overlayProgress / maxValue.toFloat())).toInt()
+        animateProgressOverlayTo(overlayWidth)
+    }
+
+    private fun animateProgressOverlayTo(targetWidth: Int) {
+        overlayWidthAnimator?.cancel()
+
+        if (overlayAnimationDuration == 0L || currentOverlayWidth == 0) {
+            applyProgressOverlayWidth(targetWidth)
+            return
+        }
+
+        overlayWidthAnimator = ValueAnimator.ofInt(currentOverlayWidth, targetWidth).apply {
+            duration = overlayAnimationDuration
+            interpolator = DecelerateInterpolator()
+            addUpdateListener { animator ->
+                applyProgressOverlayWidth(animator.animatedValue as Int)
+            }
+            start()
+        }
+    }
+
+    private fun applyProgressOverlayWidth(overlayWidth: Int) {
+        currentOverlayWidth = overlayWidth
         progressOverlayView.layoutParams = (progressOverlayView.layoutParams as LayoutParams).apply {
             width = overlayWidth
             height = LayoutParams.MATCH_PARENT

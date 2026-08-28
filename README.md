@@ -15,6 +15,7 @@ It is designed for expressive audio, mood, ambience, and mixer-style controls wh
 - Optional reversed progress for volume/mixer UX
 - Content scrim and text shadow options for readable labels on bright backgrounds
 - Adjustable corner radius
+- Smooth progress overlay animation while dragging
 - XML attributes and Kotlin API
 - JitPack-ready publishing setup
 - Sample app included
@@ -38,7 +39,7 @@ Add the dependency:
 
 ```kotlin
 dependencies {
-    implementation("com.github.SeonghwiShin.LottieGradientSlider:slider:0.1.0")
+    implementation("com.github.SeonghwiShin.LottieGradientSlider:slider:0.1.1")
 }
 ```
 
@@ -59,6 +60,7 @@ dependencies {
     app:lgs_contentScrimColor="#33000000"
     app:lgs_titlePaddingStart="16dp"
     app:lgs_valuePaddingEnd="16dp"
+    app:lgs_overlayAnimationDuration="120"
     app:lgs_gradientStartColor="#38D790"
     app:lgs_gradientEndColor="#4A79F1" />
 ```
@@ -72,6 +74,7 @@ moodSlider.progress = 70
 moodSlider.setCornerRadiusDp(14f)
 moodSlider.contentScrimColor = 0x33000000
 moodSlider.setTextHorizontalPaddingDp(titleStartDp = 16f, valueEndDp = 16f)
+moodSlider.overlayAnimationDuration = 120L
 moodSlider.setGradient(
     Color.parseColor("#38D790"),
     Color.parseColor("#4A79F1")
@@ -128,8 +131,8 @@ git push -u origin main
 3. Create a release tag.
 
 ```bash
-git tag 0.1.0
-git push origin 0.1.0
+git tag 0.1.1
+git push origin 0.1.1
 ```
 
 4. Open `https://jitpack.io/#SeonghwiShin/LottieGradientSlider`.

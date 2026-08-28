@@ -16,5 +16,6 @@
         <attr name="lgs_textShadowRadius" format="dimension" />
         <attr name="lgs_titlePaddingStart" format="dimension" />
         <attr name="lgs_valuePaddingEnd" format="dimension" />
+        <attr name="lgs_overlayAnimationDuration" format="integer" />
     </declare-styleable>
 </resources>
