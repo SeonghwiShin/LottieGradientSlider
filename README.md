@@ -39,7 +39,7 @@ Add the dependency:
 
 ```kotlin
 dependencies {
-    implementation("com.github.SeonghwiShin.LottieGradientSlider:slider:0.1.4")
+    implementation("com.github.SeonghwiShin.LottieGradientSlider:slider:0.1.5")
 }
 ```
 
@@ -131,8 +131,8 @@ git push -u origin main
 3. Create a release tag.
 
 ```bash
-git tag 0.1.4
-git push origin 0.1.4
+git tag 0.1.5
+git push origin 0.1.5
 ```
 
 4. Open `https://jitpack.io/#SeonghwiShin/LottieGradientSlider`.

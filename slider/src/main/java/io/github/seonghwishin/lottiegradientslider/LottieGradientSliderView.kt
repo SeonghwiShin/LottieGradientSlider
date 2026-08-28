@@ -74,7 +74,6 @@ class LottieGradientSliderView @JvmOverloads constructor(
     var reverseProgress: Boolean = true
         set(value) {
             field = value
-            overlaySeekBar.rotation = if (value) 180f else 0f
             progress = progress
         }
 
@@ -156,6 +155,8 @@ class LottieGradientSliderView @JvmOverloads constructor(
         updateClip()
         overlaySeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, rawProgress: Int, fromUser: Boolean) {
+                if (!fromUser) return
+
                 val value = if (reverseProgress) maxValue - rawProgress else rawProgress
                 setProgressInternal(value, animateOverlay = !fromUser || !isDraggingThumb)
                 listener?.onValueChanged(value, fromUser)
@@ -295,19 +296,38 @@ class LottieGradientSliderView @JvmOverloads constructor(
         }
 
         overlaySeekBar.max = maxValue
+        overlaySeekBar.setPadding(0, 0, 0, 0)
+        overlaySeekBar.thumbOffset = 0
         overlaySeekBar.progressDrawable = ColorDrawable(Color.TRANSPARENT)
         overlaySeekBar.thumb = createThumbDrawable()
         overlaySeekBar.splitTrack = false
         overlaySeekBar.setOnTouchListener { _, event ->
             when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> isDraggingThumb = false
-                MotionEvent.ACTION_MOVE -> isDraggingThumb = true
-                MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> overlaySeekBar.post {
+                MotionEvent.ACTION_DOWN -> {
                     isDraggingThumb = false
+                    overlayWidthAnimator?.cancel()
+                    true
                 }
+
+                MotionEvent.ACTION_MOVE -> {
+                    isDraggingThumb = true
+                    updateProgressFromTouch(event.x, animateOverlay = false)
+                    true
+                }
+
+                MotionEvent.ACTION_UP -> {
+                    updateProgressFromTouch(event.x, animateOverlay = !isDraggingThumb)
+                    isDraggingThumb = false
+                    true
+                }
+
+                MotionEvent.ACTION_CANCEL -> {
+                    isDraggingThumb = false
+                    true
+                }
+
+                else -> false
             }
-            false
         }
         addView(overlaySeekBar, LayoutParams(LayoutParams.MATCH_PARENT, sliderHeight).apply {
             gravity = Gravity.CENTER_VERTICAL
@@ -415,6 +435,16 @@ class LottieGradientSliderView @JvmOverloads constructor(
         overlaySeekBar.progress = if (reverseProgress) maxValue - progressValue else progressValue
         valueView.text = progressValue.toString()
         updateProgressOverlay(animateOverlay)
+    }
+
+    private fun updateProgressFromTouch(touchX: Float, animateOverlay: Boolean) {
+        val width = overlaySeekBar.width
+        if (width <= 0) return
+
+        val ratio = (touchX / width).coerceIn(0f, 1f)
+        val nextProgress = (ratio * maxValue).toInt().coerceIn(0, maxValue)
+        setProgressInternal(nextProgress, animateOverlay)
+        listener?.onValueChanged(nextProgress, true)
     }
 
     private fun updateProgressOverlay(animateOverlay: Boolean = true) {
