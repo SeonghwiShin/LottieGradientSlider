@@ -1,5 +1,7 @@
 # LottieGradientSlider
 
+![LottieGradientSlider demo](README-assets/demo.gif)
+
 `LottieGradientSlider` is an Android custom slider view that supports three background types:
 
 - Gradient
