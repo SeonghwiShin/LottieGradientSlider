@@ -10,7 +10,9 @@ import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.OvalShape
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewOutlineProvider
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
@@ -29,6 +31,7 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import kotlin.math.abs
 
 class LottieGradientSliderView @JvmOverloads constructor(
     context: Context,
@@ -54,6 +57,10 @@ class LottieGradientSliderView @JvmOverloads constructor(
     private var sliderBackground: SliderBackground? = null
     private var overlayWidthAnimator: ValueAnimator? = null
     private var currentOverlayWidth: Int = 0
+    private var progressValue: Int = 50
+    private var touchDownX: Float = 0f
+    private var isDraggingThumb: Boolean = false
+    private val touchSlop: Int = ViewConfiguration.get(context).scaledTouchSlop
 
     var maxValue: Int = 100
         set(value) {
@@ -62,12 +69,10 @@ class LottieGradientSliderView @JvmOverloads constructor(
             progress = progress.coerceIn(0, field)
         }
 
-    var progress: Int = 50
+    var progress: Int
+        get() = progressValue
         set(value) {
-            field = value.coerceIn(0, maxValue)
-            overlaySeekBar.progress = if (reverseProgress) maxValue - field else field
-            valueView.text = field.toString()
-            updateProgressOverlay()
+            setProgressInternal(value, animateOverlay = true)
         }
 
     var reverseProgress: Boolean = true
@@ -156,7 +161,7 @@ class LottieGradientSliderView @JvmOverloads constructor(
         overlaySeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar, rawProgress: Int, fromUser: Boolean) {
                 val value = if (reverseProgress) maxValue - rawProgress else rawProgress
-                progress = value
+                setProgressInternal(value, animateOverlay = fromUser && !isDraggingThumb)
                 listener?.onValueChanged(value, fromUser)
             }
 
@@ -290,6 +295,26 @@ class LottieGradientSliderView @JvmOverloads constructor(
         overlaySeekBar.progressDrawable = ColorDrawable(Color.TRANSPARENT)
         overlaySeekBar.thumb = createThumbDrawable()
         overlaySeekBar.splitTrack = false
+        overlaySeekBar.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    touchDownX = event.x
+                    isDraggingThumb = false
+                }
+
+                MotionEvent.ACTION_MOVE -> {
+                    if (abs(event.x - touchDownX) > touchSlop) {
+                        isDraggingThumb = true
+                    }
+                }
+
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> {
+                    isDraggingThumb = false
+                }
+            }
+            false
+        }
         addView(overlaySeekBar, LayoutParams(LayoutParams.MATCH_PARENT, sliderHeight).apply {
             gravity = Gravity.CENTER_VERTICAL
         })
@@ -391,15 +416,27 @@ class LottieGradientSliderView @JvmOverloads constructor(
         super.onDetachedFromWindow()
     }
 
-    private fun updateProgressOverlay() {
+    private fun setProgressInternal(value: Int, animateOverlay: Boolean) {
+        progressValue = value.coerceIn(0, maxValue)
+        overlaySeekBar.progress = if (reverseProgress) maxValue - progressValue else progressValue
+        valueView.text = progressValue.toString()
+        updateProgressOverlay(animateOverlay)
+    }
+
+    private fun updateProgressOverlay(animateOverlay: Boolean = true) {
         if (backgroundLayer.width == 0) {
-            backgroundLayer.post { updateProgressOverlay() }
+            backgroundLayer.post { updateProgressOverlay(animateOverlay) }
             return
         }
 
         val overlayProgress = if (reverseProgress) maxValue - progress else progress
         val overlayWidth = (backgroundLayer.width * (overlayProgress / maxValue.toFloat())).toInt()
-        animateProgressOverlayTo(overlayWidth)
+        if (animateOverlay) {
+            animateProgressOverlayTo(overlayWidth)
+        } else {
+            overlayWidthAnimator?.cancel()
+            applyProgressOverlayWidth(overlayWidth)
+        }
     }
 
     private fun animateProgressOverlayTo(targetWidth: Int) {

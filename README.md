@@ -15,7 +15,7 @@ It is designed for expressive audio, mood, ambience, and mixer-style controls wh
 - Optional reversed progress for volume/mixer UX
 - Content scrim and text shadow options for readable labels on bright backgrounds
 - Adjustable corner radius
-- Smooth progress overlay animation while dragging
+- Smooth overlay animation on tap, immediate overlay updates while dragging
 - XML attributes and Kotlin API
 - JitPack-ready publishing setup
 - Sample app included
@@ -39,7 +39,7 @@ Add the dependency:
 
 ```kotlin
 dependencies {
-    implementation("com.github.SeonghwiShin.LottieGradientSlider:slider:0.1.2")
+    implementation("com.github.SeonghwiShin.LottieGradientSlider:slider:0.1.3")
 }
 ```
 
@@ -131,8 +131,8 @@ git push -u origin main
 3. Create a release tag.
 
 ```bash
-git tag 0.1.2
-git push origin 0.1.2
+git tag 0.1.3
+git push origin 0.1.3
 ```
 
 4. Open `https://jitpack.io/#SeonghwiShin/LottieGradientSlider`.
