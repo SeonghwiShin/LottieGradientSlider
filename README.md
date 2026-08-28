@@ -108,34 +108,3 @@ moodSlider.setLottieUrl(
     "https://raw.githubusercontent.com/SeonghwiShin/LottieGradientSlider/main/sample-assets/background-animation-by-bajutech.json"
 )
 ```
-
-## Customization Ideas
-
-- Increase `contentScrimColor` alpha when image or Lottie backgrounds are bright.
-- Use `overlayColor` for the depleted area, or disable it with `0x00000000`.
-- Keep `textShadowRadius` around `1dp` to `3dp` for readable text without making labels look heavy.
-- In Jetpack Compose screens, use this View through `AndroidView`.
-
-## Publishing With JitPack
-
-1. Create a GitHub repository named `LottieGradientSlider` under `SeonghwiShin`.
-2. Push this project to GitHub.
-
-```bash
-git init
-git add .
-git commit -m "Initial release"
-git branch -M main
-git remote add origin https://github.com/SeonghwiShin/LottieGradientSlider.git
-git push -u origin main
-```
-
-3. Create a release tag.
-
-```bash
-git tag 0.1.5
-git push origin 0.1.5
-```
-
-4. Open `https://jitpack.io/#SeonghwiShin/LottieGradientSlider`.
-5. Build the tag.
